@@ -1,0 +1,276 @@
+<html><head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>SkyBin | Decentralized Pastebin powered by Sia Skynet</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script>
+    const web3=new Web3(window.web3.currentProvider);
+ 
+    	
+    let accounts;
+    
+    
+	
+    
+    const address="0xb96793e1b4b6c0447be4863266592245ea43ffed";
+    const abi=[
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_receiver",
+				"type": "address"
+			},
+			{
+				"name": "_value",
+				"type": "string"
+			}
+		],
+		"name": "sendMessage",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "manager",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_receiver",
+				"type": "address"
+			}
+		],
+		"name": "receiveMessage",
+		"outputs": [
+			{
+				"name": "",
+				"type": "string"
+			},
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+];    
+    const chat=new web3.eth.Contract(abi,address);
+    
+    
+//console.log(web3.eth.getBalance(chat.options.address));
+    function generateUUID() {
+      let uuid = ''
+      const cs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      for (let i = 0; i < 16; i++) {
+        uuid += cs.charAt(Math.floor(Math.random() * cs.length));
+      }
+      return uuid;
+    }
+
+    function save() {
+      var snippet = document.getElementById("snippet").value
+      
+      var button = document.getElementById("save-trigger")
+
+      button.classList.add("loading")
+      var blob = new Blob(
+        [
+          "<html><head><title>Welcome To Skybin</title><head><body><pre>" +
+          snippet +
+          "</pre></body></html>"
+        ],
+        { type: "text/html" }
+      )
+      var formData = new FormData()
+      formData.append("file", blob)
+
+      const uuid = generateUUID()
+      fetch(`https://siasky.net/skynet/skyfile/${uuid}?filename=skybin.html`, {
+        method: "POST",
+        body: formData
+      })
+        .then(response => response.json())
+        .then(result => {
+          button.classList.remove("loading")
+          
+	  web3.eth.getAccounts().then(res=>{
+                     accounts=res;
+		     chat.methods.sendMessage(document.getElementById("address").value,result.skylink).send({from: accounts[0]});
+		});
+          
+	  
+          
+        })
+        .catch(error => {
+          button.classList.remove("loading")
+          console.error("Error:", error)
+        })
+    }
+    function receive(){
+      web3.eth.getAccounts().then(res=>{
+                     accounts=res;
+		     chat.methods.receiveMessage(accounts[0]).call({from: accounts[0]}).then(message=>{
+                           $(function() {
+  var $text = $('#snippet');
+
+  $('#receive-trigger').click(function(e) {
+      e.preventDefault();
+      $text.val('https://siasky.net/'+message[0]+'\n'+'\nThis link sent you from : '+message[1]);
+  })
+})
+                     })
+		     
+		});
+   }
+   
+   
+  </script>
+
+  <style type="text/css">
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+        "Segoe UI Symbol";
+      color: #4a5568;
+      background-color: #fff;
+    }
+
+    h1 {
+      font-size: 48px;
+      font-weight: 500;
+      margin-top: 40px;
+      margin-bottom: 10px;
+    }
+
+    .wrapper {
+      display: flex;
+      height: calc(100vh - 40px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .caps {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #57b560;
+    }
+
+    .snippet-wrapper {
+      margin-top: 30px;
+      background: #ffffff;
+      box-shadow: 20px 20px 60px #cfcfcf, -20px -20px 60px #ffffff;
+      overflow: hidden;
+      border-radius: 20px;
+    }
+
+    #snippet {
+      padding: 40px;
+      border: none;
+      background: transparent;
+    }
+
+    .cta {
+      margin-top: 40px;
+    }
+
+    .btn {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 20px 40px;
+      background: #57b560;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .btn:hover {
+      background: #59ad61;
+    }
+
+    .btn:active {
+      background: #57b560;
+    }
+
+    .btn>svg {
+      padding-right: 8px;
+    }
+
+    .loading {
+      background: gray !important;
+      cursor: not-allowed;
+    }
+
+    #skylinks {
+      padding-top: 40px;
+    }
+
+    #skylinks>a {
+      padding-top: 20px;
+      display: block;
+      color: #4a5568;
+      font-size: 18px;
+    }
+    input[type=text] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <h1>skybin</h1>
+    <span class="caps" style="font-size: 16px;">Pastebin, Decentralized &amp; Encrypted.</span>
+
+    <div class="snippet-wrapper">
+      <textarea id="snippet" rows="20" cols="80" placeholder="Paste your snippet here"></textarea>
+    </div>
+    <br>
+    <div class="cta">
+      <button id="save-trigger" class="btn" type="button" onclick="save()">
+        Send this message to
+      </button>
+	<input id="address" type="text"/>
+    </div>
+    <div class="cta">
+      <button id="receive-trigger" class="btn" type="button" onclick="receive()">
+        See message received
+      </button>
+    </div>
+    <div id="skylinks"></div>
+
+    <span style="margin-top: auto;" class="caps">Powered by Sia Skynet</span>
+  </div>
+
+
+
+</body></html>
