@@ -6,4 +6,4 @@ This is a fully decentralized application because it's developped with skynet ne
 
 you find the application in 
 
-# https://siasky.net/CAAvhT5V_SsaQo1dRUROeRnH3MWjmnZgZdHxq0ir4eY0Bg
+# https://siasky.net/EACHjWWB8qoAaWZm3vpEcqCKFPssD49w6VumuFCLyr8PxQ
